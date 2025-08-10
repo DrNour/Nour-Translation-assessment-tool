@@ -1,3 +1,6 @@
+import nltk
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
 import streamlit as st
 import pandas as pd
 import difflib
@@ -110,3 +113,4 @@ if uploaded_file is not None:
 
 else:
     st.info("Please upload a CSV file containing 'Student_Translation' and 'Reference_Translation' columns.")
+
