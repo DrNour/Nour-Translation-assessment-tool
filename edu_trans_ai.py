@@ -1,5 +1,10 @@
 import nltk
 nltk.download('punkt', quiet=True)
+from nltk.tokenize import sent_tokenize
+text = "This is a sentence. Here is another one."
+sentences = sent_tokenize(text)
+print(sentences)
+nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
 import streamlit as st
 import pandas as pd
@@ -112,5 +117,6 @@ if uploaded_file is not None:
 
 else:
     st.info("Please upload a CSV file containing 'Student_Translation' and 'Reference_Translation' columns.")
+
 
 
