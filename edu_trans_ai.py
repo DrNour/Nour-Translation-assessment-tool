@@ -6,7 +6,6 @@ import pandas as pd
 import difflib
 import nltk
 import error_categorization as ec  # your module with detect_errors, etc.
-
 # Download required NLTK data
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
@@ -113,4 +112,5 @@ if uploaded_file is not None:
 
 else:
     st.info("Please upload a CSV file containing 'Student_Translation' and 'Reference_Translation' columns.")
+
 
