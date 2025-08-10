@@ -1,19 +1,27 @@
-import nltk
-# Download required NLTK data once at the start
-nltk.download('punkt', quiet=True)
-nltk.download('stopwords', quiet=True)
-
 import streamlit as st
 import pandas as pd
 import difflib
 import error_categorization as ec  # your module with detect_errors, etc.
-
+import re
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize, sent_tokenize
+import nltk
 
+# Download only stopwords (no punkt needed anymore)
+nltk.download('stopwords', quiet=True)
 stop_words = set(stopwords.words('english'))
 
-# Fluency scoring function
+# --- Custom sentence splitter ---
+def split_sentences(text):
+    """
+    Splits text into sentences using regex.
+    Handles English and Arabic punctuation.
+    """
+    text = str(text).strip()
+    sentences = re.split(r'[.!?؟…]+', text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+    return sentences
+
+# --- Fluency scoring function without NLTK punkt ---
 def fluency_features(text):
     tokens = text.split()
     if not tokens:
@@ -23,7 +31,7 @@ def fluency_features(text):
     func_words_count = sum(1 for t in tokens if t.lower() in stop_words)
     func_word_ratio = func_words_count / len(tokens)
 
-    sentences = sent_tokenize(text)
+    sentences = split_sentences(text)
     avg_sent_len = sum(len(s.split()) for s in sentences) / max(len(sentences), 1)
 
     score = 0.4 * (1 - min(avg_token_len / 20, 1))  # penalize long tokens
@@ -32,7 +40,7 @@ def fluency_features(text):
 
     return round(score, 3)
 
-# Precision and recall for key terms
+# --- Precision & recall for key terms ---
 def precision_recall(student_text, reference_text, key_terms):
     stoks = set(student_text.lower().split())
     rtoks = set(reference_text.lower().split())
@@ -45,6 +53,7 @@ def precision_recall(student_text, reference_text, key_terms):
     recall = len(true_positives) / max(len(relevant), 1)
     return round(precision, 3), round(recall, 3)
 
+# --- Streamlit app ---
 st.title("EduTransAI - Comprehensive Translation Assessment")
 
 uploaded_file = st.file_uploader("Upload your translations CSV file", type=["csv"])
@@ -71,9 +80,11 @@ if uploaded_file is not None:
     df['Reference_Translation'] = df['Reference_Translation'].fillna("").astype(str)
 
     # Use your advanced error detection
-    df = ec.categorize_errors_dataframe(df,
-                                       student_col='Student_Translation',
-                                       reference_col='Reference_Translation')
+    df = ec.categorize_errors_dataframe(
+        df,
+        student_col='Student_Translation',
+        reference_col='Reference_Translation'
+    )
 
     accuracy_scores = []
     fluency_scores = []
@@ -106,8 +117,12 @@ if uploaded_file is not None:
                      'Fluency_Score', 'Glossary_Precision', 'Glossary_Recall', 'Errors_Detected']])
 
     csv = df.to_csv(index=False).encode('utf-8')
-    st.download_button("Download Full Results CSV", data=csv,
-                       file_name="translation_assessment.csv", mime="text/csv")
+    st.download_button(
+        "Download Full Results CSV",
+        data=csv,
+        file_name="translation_assessment.csv",
+        mime="text/csv"
+    )
 
 else:
     st.info("Please upload a CSV file containing 'Student_Translation' and 'Reference_Translation' columns.")
