@@ -1,19 +1,13 @@
 import nltk
-nltk.download('punkt', quiet=True)
-from nltk.tokenize import sent_tokenize
-text = "This is a sentence. Here is another one."
-sentences = sent_tokenize(text)
-print(sentences)
+# Download required NLTK data once at the start
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
+
 import streamlit as st
 import pandas as pd
 import difflib
-import nltk
 import error_categorization as ec  # your module with detect_errors, etc.
-# Download required NLTK data
-nltk.download('punkt', quiet=True)
-nltk.download('stopwords', quiet=True)
+
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
 
@@ -30,7 +24,7 @@ def fluency_features(text):
     func_word_ratio = func_words_count / len(tokens)
 
     sentences = sent_tokenize(text)
-    avg_sent_len = sum(len(s.split()) for s in sentences) / max(len(sentences),1)
+    avg_sent_len = sum(len(s.split()) for s in sentences) / max(len(sentences), 1)
 
     score = 0.4 * (1 - min(avg_token_len / 20, 1))  # penalize long tokens
     score += 0.4 * min(func_word_ratio / 0.4, 1)    # reward natural function word ratio
@@ -117,6 +111,3 @@ if uploaded_file is not None:
 
 else:
     st.info("Please upload a CSV file containing 'Student_Translation' and 'Reference_Translation' columns.")
-
-
-
